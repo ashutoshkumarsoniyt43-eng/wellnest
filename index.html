@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MedAI — AI-Powered Health Diagnosis</title>
+  <meta name="description" content="MedAI is an intelligent health diagnosis system powered by AI. Enter your symptoms and receive instant, accurate health insights." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ─── SETTINGS MODAL ─── -->
+  <div id="settings-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-icon">⚙️</div>
+        <h2 id="settings-title">n8n Integration Settings</h2>
+        <p>Configure your n8n webhook to power the AI diagnosis engine.</p>
+      </div>
+      <div class="form-group">
+        <label for="webhook-url">Webhook URL</label>
+        <input id="webhook-url" type="url" placeholder="https://your-n8n-instance.com/webhook/..." />
+        <span class="hint">Paste the POST webhook URL from your n8n workflow.</span>
+      </div>
+      <div class="form-group">
+        <label for="api-key">API Key <span class="optional">(optional)</span></label>
+        <input id="api-key" type="password" placeholder="Bearer token or API key" />
+        <span class="hint">Added as Authorization header if provided.</span>
+      </div>
+      <div class="modal-actions">
+        <button id="save-settings-btn" class="btn btn-primary" onclick="saveSettings()">Save &amp; Connect</button>
+        <button class="btn btn-ghost" onclick="closeSettings()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── NAV ─── -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-brand">
+      <div class="nav-logo">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+          <circle cx="14" cy="14" r="13" stroke="url(#g1)" stroke-width="2"/>
+          <path d="M14 7v14M7 14h14" stroke="url(#g2)" stroke-width="2.5" stroke-linecap="round"/>
+          <defs>
+            <linearGradient id="g1" x1="0" y1="0" x2="28" y2="28" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#a855f7"/><stop offset="1" stop-color="#3b82f6"/>
+            </linearGradient>
+            <linearGradient id="g2" x1="0" y1="0" x2="28" y2="28" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#a855f7"/><stop offset="1" stop-color="#3b82f6"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <span>MedAI</span>
+      </div>
+      <div class="nav-badge" id="connection-badge">Not Connected</div>
+    </div>
+    <div class="nav-links">
+      <a href="#diagnose" class="nav-link active" id="tab-diagnose" onclick="switchTab('diagnose')">Diagnose</a>
+      <a href="#chat" class="nav-link" id="tab-chat" onclick="switchTab('chat')">AI Chat</a>
+      <a href="#history" class="nav-link" id="tab-history" onclick="switchTab('history')">History</a>
+    </div>
+    <button class="btn btn-outline" id="settings-btn" onclick="openSettings()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      Configure n8n
+    </button>
+  </nav>
+
+  <!-- ─── HERO ─── -->
+  <header class="hero" id="hero">
+    <div class="hero-glow hero-glow-1"></div>
+    <div class="hero-glow hero-glow-2"></div>
+    <div class="hero-content">
+      <div class="hero-tag">
+        <span class="pulse-dot"></span> AI-Powered Diagnosis
+      </div>
+      <h1>Your Personal <span class="gradient-text">Health AI</span> Doctor</h1>
+      <p>Describe your symptoms and let our n8n-powered AI engine analyze, diagnose, and guide you — instantly and intelligently.</p>
+      <div class="hero-stats">
+        <div class="stat-item"><span class="stat-num">98%</span><span class="stat-label">Accuracy Rate</span></div>
+        <div class="stat-divider"></div>
+        <div class="stat-item"><span class="stat-num">&lt;5s</span><span class="stat-label">Avg Response</span></div>
+        <div class="stat-divider"></div>
+        <div class="stat-item"><span class="stat-num">200+</span><span class="stat-label">Conditions Covered</span></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ─── MAIN CONTENT ─── -->
+  <main class="main-container">
+
+    <!-- ═══ DIAGNOSE TAB ═══ -->
+    <section id="section-diagnose" class="tab-section active">
+      <div class="two-col-layout">
+
+        <!-- LEFT: FORM -->
+        <div class="form-panel glass-card">
+          <div class="panel-header">
+            <div class="panel-icon purple">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+            <div>
+              <h2>Patient Information</h2>
+              <p class="sub">Fill in details for accurate diagnosis</p>
+            </div>
+          </div>
+
+          <form id="diagnosis-form" onsubmit="submitDiagnosis(event)">
+            <!-- Personal Info -->
+            <div class="section-divider">
+              <span>Personal Details</span>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="patient-name">Full Name</label>
+                <input id="patient-name" type="text" placeholder="John Doe" required />
+              </div>
+              <div class="form-group">
+                <label for="patient-age">Age</label>
+                <input id="patient-age" type="number" placeholder="25" min="1" max="120" required />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="patient-gender">Gender</label>
+                <select id="patient-gender" required>
+                  <option value="" disabled selected>Select gender</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                  <option value="other">Other</option>
+                  <option value="prefer-not">Prefer not to say</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="patient-weight">Weight (kg)</label>
+                <input id="patient-weight" type="number" placeholder="70" min="1" max="300" />
+              </div>
+            </div>
+
+            <!-- Symptoms -->
+            <div class="section-divider">
+              <span>Symptoms</span>
+            </div>
+            <div class="form-group">
+              <label>Common Symptoms <span class="hint-inline">(select all that apply)</span></label>
+              <div class="symptom-grid" id="symptom-grid">
+                <!-- filled by JS -->
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="symptom-text">Describe Your Symptoms</label>
+              <textarea id="symptom-text" rows="4" placeholder="e.g. I've had a persistent headache for 3 days, mild fever in the evenings, and feel fatigued..." required></textarea>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="duration">Duration</label>
+                <select id="duration">
+                  <option value="">Select duration</option>
+                  <option value="< 1 day">Less than 1 day</option>
+                  <option value="1-3 days">1–3 days</option>
+                  <option value="3-7 days">3–7 days</option>
+                  <option value="1-2 weeks">1–2 weeks</option>
+                  <option value="> 2 weeks">More than 2 weeks</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="severity">Severity (1–10)</label>
+                <div class="severity-slider-wrap">
+                  <input id="severity" type="range" min="1" max="10" value="5" oninput="updateSeverity(this.value)" />
+                  <span id="severity-val" class="severity-badge">5</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Medical History -->
+            <div class="section-divider">
+              <span>Medical History</span>
+            </div>
+            <div class="form-group">
+              <label for="medical-history">Existing Conditions / Allergies</label>
+              <textarea id="medical-history" rows="2" placeholder="e.g. Diabetes Type 2, Penicillin allergy..."></textarea>
+            </div>
+            <div class="form-group">
+              <label for="current-meds">Current Medications</label>
+              <input id="current-meds" type="text" placeholder="e.g. Metformin 500mg, Vitamin D..." />
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-full" id="submit-btn">
+              <span id="submit-text">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                Analyze Symptoms
+              </span>
+              <span id="submit-loading" class="hidden">
+                <span class="spinner"></span> Analyzing...
+              </span>
+            </button>
+          </form>
+        </div>
+
+        <!-- RIGHT: RESULTS -->
+        <div class="results-column">
+
+          <!-- Placeholder -->
+          <div class="glass-card result-placeholder" id="result-placeholder">
+            <div class="placeholder-icon">🩺</div>
+            <h3>Awaiting Analysis</h3>
+            <p>Fill in your symptoms and click <strong>Analyze Symptoms</strong> to get your AI diagnosis.</p>
+            <div class="placeholder-steps">
+              <div class="step"><span class="step-num">1</span> Configure n8n webhook</div>
+              <div class="step"><span class="step-num">2</span> Enter patient details</div>
+              <div class="step"><span class="step-num">3</span> Describe symptoms</div>
+              <div class="step"><span class="step-num">4</span> Get AI diagnosis</div>
+            </div>
+          </div>
+
+          <!-- Results Card -->
+          <div class="glass-card result-card hidden" id="result-card">
+            <div class="result-header">
+              <div class="panel-icon green">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              </div>
+              <div>
+                <h2>Diagnosis Result</h2>
+                <p class="sub" id="result-timestamp"></p>
+              </div>
+              <div id="urgency-badge" class="urgency-badge"></div>
+            </div>
+
+            <div class="result-section">
+              <h4>Primary Diagnosis</h4>
+              <div id="primary-diagnosis" class="diagnosis-highlight"></div>
+            </div>
+            <div class="result-section">
+              <h4>Analysis Summary</h4>
+              <p id="analysis-summary" class="result-text"></p>
+            </div>
+            <div class="result-section" id="possible-conditions-section">
+              <h4>Possible Conditions</h4>
+              <div id="possible-conditions" class="conditions-list"></div>
+            </div>
+            <div class="result-section" id="recommendations-section">
+              <h4>Recommendations</h4>
+              <ul id="recommendations-list" class="recommendations-list"></ul>
+            </div>
+            <div class="result-section" id="medicines-section">
+              <h4>Suggested Medications</h4>
+              <div id="medicines-list" class="medicines-grid"></div>
+            </div>
+            <div class="result-footer">
+              <div class="disclaimer">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                This is an AI-generated result for informational purposes only. Always consult a licensed medical professional.
+              </div>
+              <button class="btn btn-outline btn-sm" onclick="saveToHistory()">Save to History</button>
+            </div>
+          </div>
+
+          <!-- Error Card -->
+          <div class="glass-card error-card hidden" id="error-card">
+            <div class="error-icon">⚠️</div>
+            <h3>Connection Failed</h3>
+            <p id="error-message">Could not reach the n8n webhook. Please check your settings.</p>
+            <button class="btn btn-outline" onclick="openSettings()">Open Settings</button>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ CHAT TAB ═══ -->
+    <section id="section-chat" class="tab-section hidden">
+      <div class="chat-layout glass-card">
+        <div class="chat-header">
+          <div class="chat-avatar">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          </div>
+          <div>
+            <h3>MedAI Assistant</h3>
+            <span class="online-dot">● Online</span>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="clearChat()">Clear Chat</button>
+        </div>
+        <div class="chat-messages" id="chat-messages">
+          <div class="chat-msg bot">
+            <div class="msg-avatar bot-avatar">🤖</div>
+            <div class="msg-bubble">
+              <p>Hello! I'm your MedAI assistant powered by n8n. You can ask me about symptoms, medications, or general health questions. How can I help you today?</p>
+              <span class="msg-time">Now</span>
+            </div>
+          </div>
+        </div>
+        <div class="chat-input-row">
+          <input id="chat-input" type="text" placeholder="Ask me anything about your health..." onkeydown="if(event.key==='Enter') sendChat()" />
+          <button id="chat-send-btn" class="btn btn-primary btn-icon" onclick="sendChat()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ HISTORY TAB ═══ -->
+    <section id="section-history" class="tab-section hidden">
+      <div class="history-header">
+        <h2>Diagnosis History</h2>
+        <button class="btn btn-outline btn-sm" onclick="clearHistory()">Clear All</button>
+      </div>
+      <div id="history-list" class="history-list">
+        <div class="empty-state">
+          <div class="empty-icon">📋</div>
+          <h3>No diagnoses yet</h3>
+          <p>Your saved diagnoses will appear here.</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ─── FOOTER ─── -->
+  <footer class="footer">
+    <p>MedAI &copy; 2025 · Powered by <strong>n8n</strong> &amp; AI · For informational use only</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
