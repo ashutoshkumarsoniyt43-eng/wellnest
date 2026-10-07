@@ -18,9 +18,9 @@ To use the original project folder instead, pass its location to `--project-dir`
 
 ## How selection works
 
-Both models receive the same 264-feature binary symptom vector, constructed in the order from `symptom_list.pkl`. M1 and M2 each return a disease probability vector. The server reads the highest class probability from each model and returns only the disease result from the model with the larger top-class score, along with that selected model's name. Scores and the other model's output are not sent to or shown in the results view.
+Both models receive the same 264-feature binary symptom vector, constructed in the order from `symptom_list.pkl`. M1 and M2 each return a disease probability vector. The server compares their highest class probabilities, then returns the selected model's ranked diagnosis table, description, and precautions. The results page does not display the selected model's identity or the other model's outputs.
 
-The selection rule compares the models' top-class probability outputs internally. These are not validated estimates of medical accuracy or certainty, and differently calibrated models may not be directly comparable. The result is an educational model output, not a definitive diagnosis.
+The selection rule compares the models' top-class probability outputs internally. The page shows probability percentages from the selected model like the diagnosis script output. These are not validated estimates of medical accuracy or certainty, and differently calibrated models may not be directly comparable. The result is an educational model output, not a definitive diagnosis.
 
 Disease descriptions, precaution notes, symptom choices, and symptom-pattern frequencies come from the supplied files. Reference notes are for project demonstration only; do not treat them as medical advice. The site's severity label is the same sum-of-weights rule in `diagnose.py`; it is a project estimate, not a clinical triage assessment.
 

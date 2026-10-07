@@ -140,14 +140,44 @@ def build_result(engine, symptoms):
     # onto disease names (including M2's label encoder) and sorts highest first.
     m1 = engine._probabilities(vector, "rf")
     m2 = engine._probabilities(vector, "xgb")
-    # Compare top-class probabilities internally; return only the winning result.
+    # Compare top-class probabilities internally and keep the winning model private.
     candidates = [
         {"id": "M1", "name": "Random Forest", "disease": str(m1.index[0]), "probability": float(m1.iloc[0])},
         {"id": "M2", "name": "XGBoost", "disease": str(m2.index[0]), "probability": float(m2.iloc[0])},
     ]
     selected = max(candidates, key=lambda item: item["probability"])
+    model_key = "xgb" if selected["id"] == "M2" else "rf"
+    table = engine.diagnose(symptoms, top_n=10, n_next=5, min_freq=0.05, model=model_key, verbose=False)
+    rows = table.to_dict(orient="records")
+    for row in rows:
+        row["Rank"] = int(row["Rank"])
+        for key, value in row.items():
+            if key != "Rank":
+                row[key] = str(value)
+    if not rows:
+        rows = [{
+            "Rank": 1,
+            "Disease": selected["disease"],
+            "Probability": f"{selected['probability'] * 100:.1f}%",
+            "Matched symptoms": "No strong frequency match in the project reference table",
+            "Possible next symptoms": "",
+        }]
+    top_disease = rows[0]["Disease"]
+    try:
+        description = str(engine.get_description(top_disease))
+    except (IndexError, KeyError):
+        description = ""
+    try:
+        precautions = [str(value) for value in engine.get_precautions(top_disease)]
+    except (IndexError, KeyError):
+        precautions = []
+    severity, _, _ = engine.severity_level(symptoms)
     return {
-        "selected": {"id": selected["id"], "name": selected["name"], "disease": selected["disease"]},
+        "result": top_disease,
+        "rows": rows,
+        "description": description,
+        "precautions": precautions,
+        "severity": severity,
     }
 
 

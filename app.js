@@ -73,10 +73,25 @@ function showError(message) { errorEl.textContent = message; errorEl.hidden = fa
 function clearError() { errorEl.hidden = true; errorEl.textContent = ''; }
 
 function renderResult(data) {
-  const picked = data.selected;
+  const best = data.rows[0];
   document.querySelector('#selected-result').innerHTML = `
-    <div class="result-copy"><div class="selected-overline">SELECTED MODEL · ${escapeHtml(picked.id)} — ${escapeHtml(picked.name)}</div>
-      <div class="selected-disease">${escapeHtml(picked.disease)}</div></div>`;
+    <div class="result-copy"><div class="selected-overline">TOP MATCH</div>
+      <div class="selected-disease">${escapeHtml(data.result)}</div>
+      <div class="primary-probability">${escapeHtml(best.Probability)}</div></div>`;
+  document.querySelector('#diagnosis-rows').innerHTML = data.rows.map(row => `
+    <tr><td class="rank-cell">${escapeHtml(row.Rank)}</td>
+      <td class="disease-cell">${escapeHtml(row.Disease)}</td>
+      <td class="probability-cell">${escapeHtml(row.Probability)}</td>
+      <td>${escapeHtml(row['Matched symptoms'])}</td>
+      <td>${escapeHtml(row['Possible next symptoms'])}</td></tr>`).join('');
+  const precautions = data.precautions.length
+    ? `<ul>${data.precautions.map(note => `<li>${escapeHtml(note)}</li>`).join('')}</ul>`
+    : '<p>No precaution notes are listed in the project data.</p>';
+  document.querySelector('#result-info').innerHTML = `
+    <article class="result-info-card"><h3>${escapeHtml(data.result)}</h3>
+      <p>${escapeHtml(data.description || 'No description is listed in the project data.')}</p></article>
+    <article class="result-info-card"><h3>Precautions from project data</h3>${precautions}
+      <p class="severity-note">Entered symptom severity estimate: ${escapeHtml(data.severity)}.</p></article>`;
   results.hidden = false;
 }
 

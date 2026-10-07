@@ -59,8 +59,16 @@
     </section>
 
     <section id="results" class="results-section" hidden aria-live="polite">
-      <div class="results-title"><div><div class="eyebrow"><span class="eyebrow-line"></span> YOUR RESULT</div><h2>For your <em>conversation.</em></h2></div><button id="reset-button" class="reset-button" type="button">↺ <span>New check-in</span></button></div>
+      <div class="results-title"><div><div class="eyebrow"><span class="eyebrow-line"></span> DIAGNOSIS RESULTS</div><h2>Possible <em>matches.</em></h2></div><button id="reset-button" class="reset-button" type="button">↺ <span>New check-in</span></button></div>
       <div id="selected-result" class="selected-result"></div>
+      <div class="results-table-wrap">
+        <table class="diagnosis-table">
+          <thead><tr><th>Rank</th><th>Disease</th><th>Probability</th><th>Matched symptoms</th><th>Possible next symptoms</th></tr></thead>
+          <tbody id="diagnosis-rows"></tbody>
+        </table>
+      </div>
+      <div id="result-info" class="result-info-grid"></div>
+      <p class="result-disclaimer">These percentages are model outputs, not validated accuracy rates; different models may be calibrated differently. This educational result is not medical certainty. Talk with a qualified healthcare professional about health concerns.</p>
     </section>
 
     <section id="how-it-works" class="how-section"><div class="eyebrow"><span class="eyebrow-line"></span> A LITTLE TRANSPARENCY</div><h2>Two perspectives.<br><em>One clear view.</em></h2><p>Wellnest uses both models from your project: M1 Random Forest and M2 XGBoost. It chooses the model with the higher probability internally and shows only that model’s result.</p><div class="how-steps"><article><span>01</span><div><b>Choose symptoms</b><p>Options come directly from your model’s 264-feature symptom list.</p></div></article><article><span>02</span><div><b>Run both models</b><p>The model outputs are checked behind the scenes; other predictions stay hidden.</p></div></article><article><span>03</span><div><b>Review the result</b><p>See only the selected model and its result.</p></div></article></div></section>
